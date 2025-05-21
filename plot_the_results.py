@@ -96,11 +96,19 @@ def plot_bar_chart(summary):
 
 def plot_cdf(data_dict, summary):
     fig, ax = plt.subplots(figsize=(10, 6))
-    for label, data in data_dict.items():
+    n = len(data_dict)
+    for idx, (label, data) in enumerate(data_dict.items()):
         data = np.sort(data)
-        cdf = np.arange(1, len(data)+1) / len(data)
-        ax.plot(data, cdf, label=label)
-        ax.axvline(summary[label]['q3'], linestyle='--', alpha=0.3)
+        cdf  = np.arange(1, len(data)+1) / len(data)
+        # plot returns a list of Line2D objects; grab the first one
+        line, = ax.plot(data, cdf, label=label)
+        # fetch its color
+        col = line.get_color()
+        # compute the 75th percentile
+        q3 = summary[label]['q3']
+        # draw the quartile line in the same color, with a tiny jitter so they don't overlap
+        jitter = (idx - (n-1)/2) * 0.01
+        ax.axvline(q3 + jitter, linestyle='--', color=col, alpha=0.3)
 
     ax.set_xlabel('Error (meters)')
     ax.set_ylabel('Cumulative Probability')
